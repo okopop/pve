@@ -1,0 +1,1 @@
+qm importovf 100 /tmp/vms/din_maskin.ovf vm-data
