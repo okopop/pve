@@ -1,9 +1,12 @@
 qm importovf 100 /tmp/vms/din_maskin.ovf vm-data
 
+change scsci -> sata + boot-order
+add network, add mac-address
+
 dnf install qemu-guest-agent -y
+
+change sata -> scsci and virtio single
 
 lsinitrd /boot/initramfs-$(uname -r).img | grep virtio
 <om tom>
 dracut --force -v /boot/initramfs-$(uname -r).img $(uname -r)
-
-
