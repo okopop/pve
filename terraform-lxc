@@ -11,6 +11,7 @@ pveum user token add terraform@pve tf-token --privsep 0
 
 lxc:
 mkdir ~/proxmox-tf && cd ~/proxmox-tf
+
 cat > main.tf
 terraform {
   required_providers {
@@ -52,7 +53,7 @@ resource "proxmox_virtual_environment_container" "test_lxc" {
 
   operating_system {
     template_file_id = "local:vztmpl/almalinux-10-default_20250930_amd64.tar.xz"
-    type             = "almalinux"
+    type             = "centos"
   }
 
   disk {
