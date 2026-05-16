@@ -1,0 +1,67 @@
+lxc (almalinux10):
+dnf install -y dnf-plugins-core
+dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+dnf install -y terraform
+
+pve:
+pveum role add TerraformProv -privs "Datastore.Allocate Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.PowerMgmt SDN.Use"
+pveum user add terraform@pve
+pveum acl modify / -user terraform@pve -role TerraformProv
+pveum user token add terraform@pve tf-token --privsep 0
+
+lxc:
+mkdir ~/proxmox-tf && cd ~/proxmox-tf
+cat > main.tf
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.48.0"
+    }
+  }
+}
+
+provider "proxmox" {
+  endpoint  = "https://<PROXMOX-IP>:8006/"
+  api_token = "terraform@pve!tf-token=<APK_KEY>"
+  insecure  = true
+}
+
+resource "proxmox_virtual_environment_container" "test_lxc" {
+  description = "Created by Terraform"
+  node_name   = "pve"
+  vm_id       = 300
+
+  initialization {
+    hostname = "tf-almalinux"
+    
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+    
+    user_account {
+      password = "<REPLACE ME>"
+    }
+  }
+
+  network_interface {
+    name = "eth0"
+  }
+
+  operating_system {
+    template_file_id = "local:vztmpl/almalinux-10-default_20250930_amd64.tar.xz"
+    type             = "almalinux"
+  }
+
+  disk {
+    datastore_id = "local-lvm"
+    size         = 8
+  }
+}
+
+Now run it:
+terraform init
+terraform plan
+terraform apply
