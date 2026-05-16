@@ -1,1 +1,9 @@
 qm importovf 100 /tmp/vms/din_maskin.ovf vm-data
+
+dnf install qemu-guest-agent -y
+
+lsinitrd /boot/initramfs-$(uname -r).img | grep virtio
+<om tom>
+dracut --force -v /boot/initramfs-$(uname -r).img $(uname -r)
+
+
