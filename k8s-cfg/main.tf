@@ -28,16 +28,22 @@ resource "proxmox_virtual_environment_vm" "talos_cp" {
     }
   }
 
+  # KORRIGERING: Parametern heter scsi_hardware
+  scsi_hardware = "virtio-scsi-single"
+
   network_device {
     bridge      = "vmbr0"
     mac_address = local.cp_mac
-    firewall    = false # Förhindrar att Proxmox blockerar externa portar som 50000
+    firewall    = false
+    model       = "virtio"
   }
 
   disk {
     datastore_id = var.vm_storage
     file_format  = "raw"
-    interface    = "sata0"
+    interface    = "scsi0"
+    iothread     = true
+    discard      = "on"
     size         = 20
   }
 
@@ -76,16 +82,22 @@ resource "proxmox_virtual_environment_vm" "talos_workers" {
     }
   }
 
+  # KORRIGERING: Parametern heter scsi_hardware
+  scsi_hardware = "virtio-scsi-single"
+
   network_device {
     bridge      = "vmbr0"
     mac_address = local.worker_macs[count.index]
-    firewall    = false # Förhindrar att Proxmox blockerar externa portar som 50000
+    firewall    = false
+    model       = "virtio"
   }
 
   disk {
     datastore_id = var.vm_storage
     file_format  = "raw"
-    interface    = "sata0"
+    interface    = "scsi0"
+    iothread     = true
+    discard      = "on"
     size         = 20
   }
 
